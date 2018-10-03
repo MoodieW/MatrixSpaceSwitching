@@ -71,7 +71,7 @@ def space_switch(drivers = None, driven = None, orient = None,
     if driven == None:
         raise ValueError('Please provide Driven Object')
     else:
-        driven_object = drivers
+        driven_object = driven
 
         pm.addAttr(ln='Space_Switch', at='enum', en=enum_list, k=True)
         choice = pm.createNode('choice', n=driven_object + '_Switch')
@@ -81,8 +81,8 @@ def space_switch(drivers = None, driven = None, orient = None,
     for iter, driver in enumerate(drivers):
         driver.worldMatrix[0] >> choice.input[iter]
 
-    driven_parent=  driven.getParent()
+    driven_parent=  driven_object.getParent()
 
-    decomp = pm.createNode('decomposeMatrix', n=driven + '_decompMatrix')
-    mult = pm.createNode('multMatrix', n=driven + '_multMatrix')
-    wt = pm.createNode('wtAddMatrix', n=driven + '_wtMatrix')
+    decomp = pm.createNode('decomposeMatrix', n=driven_object + '_decompMatrix')
+    mult = pm.createNode('multMatrix', n=driven_object + '_multMatrix')
+    wt = pm.createNode('wtAddMatrix', n=driven_object + '_wtMatrix')
