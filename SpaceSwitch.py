@@ -12,7 +12,7 @@ try:
     from PyQt5 import QtWidgets, QtCore, QtGui
 except:
     pass
-from MatrixSpaceSwitching.Qt import QtWidgets, QtCore, QtGui
+#from MatrixSpaceSwitching.Qt import QtWidgets, QtCore, QtGui
 
 
 
@@ -72,17 +72,22 @@ def space_switch(drivers = None, driven = None, orient = None,
         raise ValueError('Please provide Driven Object')
     else:
         driven_object = driven
-
-        pm.addAttr(ln='Space_Switch', at='enum', en=enum_list, k=True)
-        choice = pm.createNode('choice', n=driven_object + '_Switch')
-        driven_object.Space_Switch >> choice.selector
-
+        #if pm.addAttr(driven_object[0]+'.Space_Switch',e= 1, enumName= "pCube6:pCube5:pCube7:5:A:B:C" ):
+        pm.addAttr(driven_object[0] ,ln='Space_Switch', at='enum', en=enum_list, k=True)
+        choice = pm.createNode('choice', n=driven_object[0] + '_Switch')
+        driven_object[0].Space_Switch >> choice.selector
 
     for iter, driver in enumerate(drivers):
         driver.worldMatrix[0] >> choice.input[iter]
 
-    driven_parent=  driven_object.getParent()
+    decomp = pm.createNode('decomposeMatrix', n=driven_object[0] + '_decompMatrix')
+    wt = pm.createNode('wtAddMatrix', n=driven_object[0] + '_wtMatrix')
 
-    decomp = pm.createNode('decomposeMatrix', n=driven_object + '_decompMatrix')
-    mult = pm.createNode('multMatrix', n=driven_object + '_multMatrix')
-    wt = pm.createNode('wtAddMatrix', n=driven_object + '_wtMatrix')
+    choice.output >> wt.wtMatrix[1].matrixIn
+    wt.matrixSum  >> decomp.inputMatrix
+
+if __name__ == "__main__":
+    drivers_list = ls(sl=True)
+    t = driven_list[0].getParent() = ls(sl=True)
+
+    space_switch(drivers = drivers_list, driven = driven_list)
