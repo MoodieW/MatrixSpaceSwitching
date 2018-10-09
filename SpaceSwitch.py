@@ -47,7 +47,7 @@ def create_enum_list(drivers):
     return enum_list[:-1]
 
 
-def space_switch(drivers = None, driven = None, orient = None,
+def space_switch(drivers = None, driven = None, parent = None, orient = None,
                  point =  None,  scale =  None, maintain_offset = None):
 
     '''
@@ -81,13 +81,13 @@ def space_switch(drivers = None, driven = None, orient = None,
         driver.worldMatrix[0] >> choice.input[iter]
 
     decomp = pm.createNode('decomposeMatrix', n=driven_object[0] + '_decompMatrix')
-    wt = pm.createNode('wtAddMatrix', n=driven_object[0] + '_wtMatrix')
+    mult = pm.createNode('multMatrix', n=driven_object[0] + '_multMatrix')
 
-    choice.output >> wt.wtMatrix[1].matrixIn
-    wt.matrixSum  >> decomp.inputMatrix
+    choice.output >> mult.matrixIn[0]
+    mult.matrixSum  >> decomp.inputMatrix
 
 if __name__ == "__main__":
-    drivers_list = ls(sl=True)
-    t = driven_list[0].getParent() = ls(sl=True)
+    #drivers_list = pm.ls(sl=True)
+    #driven_list = pm.ls(sl=True)
 
     space_switch(drivers = drivers_list, driven = driven_list)
