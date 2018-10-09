@@ -47,8 +47,8 @@ def create_enum_list(drivers):
     return enum_list[:-1]
 
 
-def space_switch(drivers = None, driven = None, parent = None, orient = None,
-                 point =  None,  scale =  None, maintain_offset = None):
+def space_switch(drivers = None, driven = None, parent_node = None, buffer = None,
+                 orient = None, point =  None, maintain_offset = None):
 
     '''
 
@@ -76,18 +76,38 @@ def space_switch(drivers = None, driven = None, parent = None, orient = None,
         pm.addAttr(driven_object[0] ,ln='Space_Switch', at='enum', en=enum_list, k=True)
         choice = pm.createNode('choice', n=driven_object[0] + '_Switch')
         driven_object[0].Space_Switch >> choice.selector
-
+        if maintain_offset:
+            choice_offset = pm.createNode('choice', n=driven_object[0] + 'offset_Switch')
+            driven_object[0].Space_Switch >> choice_offset.selector
+            
     for iter, driver in enumerate(drivers):
+        
         driver.worldMatrix[0] >> choice.input[iter]
-
+        
     decomp = pm.createNode('decomposeMatrix', n=driven_object[0] + '_decompMatrix')
     mult = pm.createNode('multMatrix', n=driven_object[0] + '_multMatrix')
 
-    choice.output >> mult.matrixIn[0]
-    mult.matrixSum  >> decomp.inputMatrix
+    choice.output                     >> mult.matrixIn[0]
+    parent_node[0].worldInverseMatrix >> mult.matrixIn[1]
+    mult.matrixSum                    >> decomp.inputMatrix    
+    
+    if maintain_offset:
+        for iter, driver in enumerate(drivers):
+            pm.addAttr(parent_node, ln=driver+'_offset', at='fltMatrix')
+            temp_matrix = driven_object[0].getMatrix(worldSpace =True) * driver.getMatrix(worldSpace =True).inverse()
+            offset_matrix = tuple(v for i in temp_matrix for v in i)
+            pm.setAttr(parent_node[0]+'.'+driver+'_offset', offset_matrix)
+            pm.connectAttr(parent_node[0]+'.'+driver+'_offset',  choice_offset.input[iter])  
+              
+        choice_offset.output >> mult.matrixIn[2]
+    
+
+    
 
 if __name__ == "__main__":
     #drivers_list = pm.ls(sl=True)
     #driven_list = pm.ls(sl=True)
+    #parent_tfm  = pm.ls(sl=True)
 
-    space_switch(drivers = drivers_list, driven = driven_list)
+    space_switch(drivers = drivers_list, driven = driven_list, 
+                 parent_node = parent_tfm, maintain_offset = True)
